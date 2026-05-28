@@ -3,8 +3,6 @@
 uv run python ./main.py
 """
 
-from __future__ import annotations
-
 from datetime import date, datetime
 import json
 
@@ -36,20 +34,20 @@ OUTPUT_FIELDS = [
 ]
 
 
-def normalize_text(value: str | None) -> str:
+def normalize_text(value):
     if not isinstance(value, str):
         return ""
     return " ".join(value.lower().split())
 
 
-def statement_present(answer: str | None, statement: str) -> bool:
+def statement_present(answer, statement):
     normalized_answer = normalize_text(answer)
     if not normalized_answer:
         return False
     return normalize_text(statement) in normalized_answer
 
 
-def parse_date(value: object) -> date | None:
+def parse_date(value):
     if not isinstance(value, str):
         return None
     try:
@@ -62,10 +60,10 @@ def parse_date(value: object) -> date | None:
         return None
 
 
-def normalize_c3(value: object) -> list[float]:
+def normalize_c3(value):
     if not isinstance(value, list):
         return []
-    numbers: list[float] = []
+    numbers = []
     for item in value:
         if isinstance(item, bool):
             continue
@@ -74,7 +72,7 @@ def normalize_c3(value: object) -> list[float]:
     return numbers
 
 
-def format_c3(value: object) -> str:
+def format_c3(value):
     if value is None:
         return ""
     try:
@@ -83,7 +81,7 @@ def format_c3(value: object) -> str:
         return ""
 
 
-def analyze_row(row: dict) -> dict:
+def analyze_row(row):
     c1 = row.get("c1") if "c1" in row else None
     c2_raw = row.get("c2") if "c2" in row else None
     c3_raw = row.get("c3") if "c3" in row else None
@@ -102,7 +100,7 @@ def analyze_row(row: dict) -> dict:
     }
 
 
-def date_note(c2_raw: object, parsed_date: date | None) -> str:
+def date_note(c2_raw, parsed_date):
     if c2_raw is None:
         return "Date missing."
     if parsed_date is None:
@@ -113,15 +111,15 @@ def date_note(c2_raw: object, parsed_date: date | None) -> str:
 
 
 def build_output_row(
-    company_id: str,
-    row_id: str,
-    theme: str,
-    analysis: dict,
-    route: str,
-    score: float,
-    max_score: float,
-    notes: str,
-) -> dict:
+    company_id,
+    row_id,
+    theme,
+    analysis,
+    route,
+    score,
+    max_score,
+    notes,
+):
     return {
         "company_id": company_id,
         "row_id": row_id,
@@ -141,7 +139,7 @@ def build_output_row(
     }
 
 
-def score_climate_row(company_id: str, row_id: str, analysis: dict) -> dict:
+def score_climate_row(company_id, row_id, analysis):
     parsed_date = analysis["parsed_date"]
     if parsed_date is None or parsed_date <= CUTOFF_DATE:
         return build_output_row(
@@ -173,7 +171,7 @@ def score_climate_row(company_id: str, row_id: str, analysis: dict) -> dict:
     )
 
 
-def score_water_row(company_id: str, row_id: str, analysis: dict) -> dict:
+def score_water_row(company_id, row_id, analysis):
     parsed_date = analysis["parsed_date"]
     if parsed_date is None:
         return build_output_row(
@@ -217,9 +215,9 @@ def score_water_row(company_id: str, row_id: str, analysis: dict) -> dict:
     )
 
 
-def score_all(data: dict) -> list[dict]:
+def score_all(data):
     """Compute per-row scores for every company under both themes."""
-    output: list[dict] = []
+    output = []
     companies = data.get("companies", {})
     for company_id, company_data in companies.items():
         rows = company_data.get("q_1_1", {})
